@@ -1,11 +1,12 @@
-# Runtime: 2188 ms, faster than 7.83% of Ruby online submissions for LRU Cache.
-# Memory Usage: 14.3 MB, less than 100.00% of Ruby online submissions for LRU Cache.
+# Runtime: 580 ms, faster than 14.46% of Ruby online submissions for LRU Cache.
+# Memory Usage: 14.4 MB, less than 100.00% of Ruby online submissions for LRU Cache.
 class LRUCache
   def initialize(capacity)
     @capacity = capacity
     @cache = {}
     @touch = {}
-    @count = 0
+    @touch_count = 0
+    @full = false
   end
 
   def get(key)
@@ -15,14 +16,20 @@ class LRUCache
   end
 
   def touch(key)
-    @count+=1
-    @touch[key] = @count
+    @touch_count+=1
+    @touch[key] = @touch_count
   end
 
   def put(key, value)
+    not_found = @cache[key].nil?
     @cache[key] = value
     self.touch(key)
-    self.del(lru_key) if @cache.count > @capacity
+    if (not_found and @full)
+      self.del(lru_key)
+    elsif not_found
+      @full = @cache.count > @capacity
+      self.del(lru_key) if @full
+    end
   end
 
   def del(key)
@@ -40,12 +47,13 @@ class LRUCache
 end
 
 # since Ruby Hash maintains the insertion order
-# Runtime: 1812 ms, faster than 9.04% of Ruby online submissions for LRU Cache.
+# Runtime: 240 ms, faster than 18.07% of Ruby online submissions for LRU Cache.
 # Memory Usage: 14.5 MB, less than 100.00% of Ruby online submissions for LRU Cache.
 class LRUCache
   def initialize(capacity)
     @capacity = capacity
     @cache = {}
+    @full = false
   end
 
   def get(key)
@@ -61,8 +69,14 @@ class LRUCache
   end
 
   def put(key, value)
+    not_found = @cache[key].nil?
     self.touch(key, value)
-    @cache.shift if @cache.count > @capacity
+    if (not_found and @full)
+      @cache.shift
+    elsif not_found
+      @full = @cache.count > @capacity
+      @cache.shift if @full
+    end
   end
 end
 
