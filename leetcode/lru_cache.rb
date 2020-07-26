@@ -22,7 +22,7 @@ class LRUCache
   def put(key, value)
     @cache[key] = value
     self.touch(key)
-    self.del(rlu_key) if @cache.count > @capacity
+    self.del(lru_key) if @cache.count > @capacity
   end
 
   def del(key)
@@ -30,12 +30,39 @@ class LRUCache
     @touch.delete(key)
   end
 
-  def rlu_key
+  def lru_key
     lru = @touch.first
     @touch.each do |key, val|
       lru = [key, val] if val < lru.last
     end
     lru.first
+  end
+end
+
+# since Ruby Hash maintains the insertion order
+# Runtime: 1812 ms, faster than 9.04% of Ruby online submissions for LRU Cache.
+# Memory Usage: 14.5 MB, less than 100.00% of Ruby online submissions for LRU Cache.
+class LRUCache
+  def initialize(capacity)
+    @capacity = capacity
+    @cache = {}
+  end
+
+  def get(key)
+    return -1 if @cache[key].nil?
+    self.touch(key)
+    @cache[key]
+  end
+
+  def touch(key, value = nil)
+    value = @cache[key] if value.nil?
+    @cache.delete(key)
+    @cache[key] = value
+  end
+
+  def put(key, value)
+    self.touch(key, value)
+    @cache.shift if @cache.count > @capacity
   end
 end
 
